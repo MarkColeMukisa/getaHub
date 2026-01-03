@@ -14,29 +14,30 @@ class BillController extends Controller
         $tenants = Tenant::orderBy('name')->get();
         $bills = Bill::with('tenant')->latest('id')->limit(50)->get();
 
-    // Server-side calculations for presentation
-    $vatRate = config('billing.vat_rate');
-    $payeFixed = config('billing.paye_amount');
-    $rubbishFee = config('billing.rubbish_fee');
-    $billRows = $bills->map(function($bill) use ($vatRate,$payeFixed,$rubbishFee){
-        $base = $bill->total_amount; // persisted base (units * unit price)
-        $vat = (int) round($base * $vatRate);
-        $paye = $payeFixed;
-        $rubbish = $rubbishFee;
-        $grand = $base + $vat + $paye + $rubbish;
-        return [
-            'tenant_display' => $bill->tenant->name.' (Room '.$bill->tenant->room_number.')',
-            'previous_reading' => $bill->previous_reading,
-            'current_reading' => $bill->current_reading,
-            'units_used' => $bill->units_used,
-            'base_amount' => $base,
-            'rubbish' => $rubbish,
-            'grand_total' => $grand,
-        ];
-    });
-    $grandTotal = $billRows->sum('grand_total');
+        // Server-side calculations for presentation
+        $vatRate = config('billing.vat_rate');
+        $payeFixed = config('billing.paye_amount');
+        $rubbishFee = config('billing.rubbish_fee');
+        $billRows = $bills->map(function ($bill) use ($vatRate, $payeFixed, $rubbishFee) {
+            $base = $bill->total_amount;
+            $vat = ($bill->vat_amount > 0) ? $bill->vat_amount : (int) round($base * $vatRate);
+            $paye = ($bill->paye_amount > 0) ? $bill->paye_amount : $payeFixed;
+            $rubbish = ($bill->rubbish_amount > 0) ? $bill->rubbish_amount : $rubbishFee;
+            $grand = ($bill->grand_total > 0) ? $bill->grand_total : ($base + $vat + $paye + $rubbish);
 
-    return view('index', compact('tenants','billRows','grandTotal'));
+            return [
+                'tenant_display' => $bill->tenant->name . ' (Room ' . $bill->tenant->room_number . ')',
+                'previous_reading' => $bill->previous_reading,
+                'current_reading' => $bill->current_reading,
+                'units_used' => $bill->units_used,
+                'base_amount' => $base,
+                'rubbish' => $rubbish,
+                'grand_total' => $grand,
+            ];
+        });
+        $grandTotal = $billRows->sum('grand_total');
+
+        return view('index', compact('tenants', 'billRows', 'grandTotal'));
     }
 
     public function store(BillStoreRequest $request)
@@ -59,7 +60,7 @@ class BillController extends Controller
 
         $totalAmount = $units * $unitPrice; // base amount per specification (UI adds other charges visually)
 
-    $bill = Bill::create([
+        $bill = Bill::create([
             'tenant_id' => $tenant->id,
             'previous_reading' => $previousReading,
             'current_reading' => $current,
@@ -69,7 +70,7 @@ class BillController extends Controller
             'month' => $monthName,
             'year' => $year,
         ]);
-    BillCreated::dispatch($bill);
+        BillCreated::dispatch($bill);
         return redirect()->back()->with('bill_created', $bill->id);
     }
 

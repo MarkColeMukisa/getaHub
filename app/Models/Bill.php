@@ -16,6 +16,10 @@ class Bill extends Model
         'units_used',
         'unit_price',
         'total_amount',
+        'vat_amount',
+        'paye_amount',
+        'rubbish_amount',
+        'grand_total',
         'month',
         'year',
     ];

@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'marz' => [
+        'key' => env('MARZ_API_KEY'),
+        'secret' => env('MARZ_API_SECRET'),
+        'url' => 'https://sms.wearemarz.com/api/v1/sms/send',
+    ],
+
 ];

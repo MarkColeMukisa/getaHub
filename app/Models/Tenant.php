@@ -18,4 +18,9 @@ class Tenant extends Model
     {
         return $this->hasMany(Bill::class);
     }
+
+    public function latestBill(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Bill::class)->latestOfMany();
+    }
 }

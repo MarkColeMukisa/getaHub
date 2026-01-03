@@ -3,6 +3,8 @@
 namespace App\Livewire;
 
 use App\Models\Tenant;
+use App\Services\SmsService;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\WithPagination;
@@ -212,15 +214,32 @@ class TenantsTable extends Component
 		$this->resetPage();
 	}
 
-	public function notify($id)
+	public function notify($id, SmsService $smsService)
 	{
 		$this->authorize('manage-tenants');
-		$tenant = Tenant::findOrFail($id);
+		$tenant = Tenant::with('latestBill')->findOrFail($id);
+		$latestBill = $tenant->latestBill;
 
-		// TODO: Implement actual SMS or Email notification logic here.
-		// For now, we'll simulate a successful notification.
+		if (!$latestBill) {
+			session()->flash('error', "No bill found for {$tenant->name}. Cannot send notification.");
+			return;
+		}
 
-		session()->flash('status', "Bill notification sent to {$tenant->name}.");
+		$contact = trim($tenant->contact);
+		Log::info("Attempting to send SMS to {$tenant->name} at {$contact}");
+
+		$billAmount = ($latestBill->grand_total > 0) ? $latestBill->grand_total : $latestBill->total_amount;
+		$message = "Hello {$tenant->name}, Geta WaterBill Services wishes you a Happy New Year 2026! 🎆 Thank you for doing business with us. Please be informed that your bills for {$latestBill->month} {$latestBill->year} are due. Total amount: UGX " . number_format($billAmount) . ". Happy New Year!";
+
+		try {
+			$response = $smsService->send($contact, $message);
+			Log::info("SMS Response for {$tenant->name}: " . json_encode($response->getData()));
+			$this->dispatch('celebrate');
+			session()->flash('status', "Bill notification sent to {$tenant->name} ({$contact}).");
+		} catch (\Exception $e) {
+			Log::error("SMS Error for {$tenant->name}: " . $e->getMessage());
+			session()->flash('error', "Failed to send notification to {$tenant->name}: " . $e->getMessage());
+		}
 	}
 
 	private function resetForm()
@@ -232,7 +251,7 @@ class TenantsTable extends Component
 	}
 
 	public function render(): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\View\View
-    {
+	{
 		$query = Tenant::query();
 		if ($this->search) {
 			$s = '%' . $this->search . '%';

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SmsController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TenantController;
 use App\Http\Controllers\BillController;
@@ -59,5 +60,7 @@ Route::middleware(['auth', 'can:manage-tenants'])->group(function () {
     Route::get('/tenants-export', [TenantController::class, 'exportCsv'])->name('tenants.export');
     Route::view('/admin/users', 'admin.users')->name('admin.users');
 });
+
+Route::get('/send', [SmsController::class, 'send']);
 
 require __DIR__ . '/auth.php';
