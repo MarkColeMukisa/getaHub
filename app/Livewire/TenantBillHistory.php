@@ -29,7 +29,7 @@ class TenantBillHistory extends Component
     {
         $tenantModel = Tenant::findOrFail($tenant);
         $this->tenantId = $tenantModel->id;
-    $this->tenantName = $tenantModel->name.' (Room '.$tenantModel->room_number.')';
+        $this->tenantName = $tenantModel->name . ' (Room ' . $tenantModel->room_number . ')';
         $this->resetPage();
         $this->show = true;
     }
@@ -55,10 +55,13 @@ class TenantBillHistory extends Component
 
         $mapped = collect();
         if ($this->tenantId) {
-            $mapped = $this->bills->getCollection()->map(function($bill) use ($vatRate,$paye,$rubbish){
+            $mapped = $this->bills->getCollection()->map(function ($bill) use ($vatRate, $paye, $rubbish) {
                 $base = $bill->total_amount;
-                $vat = (int) round($base * $vatRate);
-                $grand = $base + $vat + $paye + $rubbish;
+                $vat = ($bill->vat_amount > 0) ? $bill->vat_amount : (int) round($base * $vatRate);
+                $p = ($bill->paye_amount > 0) ? $bill->paye_amount : $paye;
+                $r = ($bill->rubbish_amount > 0) ? $bill->rubbish_amount : $rubbish;
+                $grand = ($bill->grand_total > 0) ? $bill->grand_total : ($base + $vat + $p + $r);
+
                 return [
                     'id' => $bill->id,
                     'month' => $bill->month,
@@ -68,10 +71,10 @@ class TenantBillHistory extends Component
                     'units' => $bill->units_used,
                     'base' => $base,
                     'vat' => $vat,
-                    'paye' => $paye,
-                    'rubbish' => $rubbish,
+                    'paye' => $p,
+                    'rubbish' => $r,
                     'grand' => $grand,
-                    'created' => $bill->created_at->diffForHumans(),
+                    'created' => $bill->created_at ? $bill->created_at->diffForHumans() : 'N/A',
                 ];
             });
         }

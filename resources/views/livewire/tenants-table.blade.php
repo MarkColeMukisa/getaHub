@@ -55,7 +55,7 @@
                 </td>
 
                 <td class="px-3 py-2 text-xs hidden md:table-cell">
-                    {{ $t->created_at->diffForHumans() }}
+                    {{ $t->created_at ? $t->created_at->diffForHumans() : 'N/A' }}
                 </td>
 
                 <td class="px-3 py-2">
