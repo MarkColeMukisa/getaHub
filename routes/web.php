@@ -61,6 +61,6 @@ Route::middleware(['auth', 'can:manage-tenants'])->group(function () {
     Route::view('/admin/users', 'admin.users')->name('admin.users');
 });
 
-Route::get('/send', [SmsController::class, 'send']);
+// Route::get('/send', [SmsController::class, 'send']);
 
 require __DIR__ . '/auth.php';
