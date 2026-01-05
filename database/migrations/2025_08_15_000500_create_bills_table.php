@@ -6,8 +6,8 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-        public $withinTransaction = false;
-        
+    public $withinTransaction = false;
+
     public function up(): void
     {
         Schema::create('bills', function (Blueprint $table) {
@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('month'); // e.g. January
             $table->unsignedSmallInteger('year');
             $table->timestamps();
-            $table->index(['tenant_id','year','month']);
+            $table->index(['tenant_id', 'year', 'month']);
         });
     }
 
