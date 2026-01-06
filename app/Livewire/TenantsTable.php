@@ -229,7 +229,7 @@ class TenantsTable extends Component
 		Log::info("Attempting to send SMS to {$tenant->name} at {$contact}");
 
 		$billAmount = ($latestBill->grand_total > 0) ? $latestBill->grand_total : $latestBill->total_amount;
-		$message = "Hello {$tenant->name}, Geta WaterBill Services wishes you a Happy New Year 2026! 🎆 Thank you for doing business with us. Please be informed that your bill for December 2025 is due. Total amount: UGX " . number_format($billAmount) . ". Happy New Year!
+		$message = "Hello {$tenant->name}, Geta WaterBill Services wishes you a Happy New Year 2026! 🎆 Thank you for doing business with us. Please be informed that your bill for {$latestBill->month} {$latestBill->year} is due. Total amount: UGX " . number_format($billAmount) . ". Happy New Year!
 		For inquiries and feedback, chat with us on WhatsApp: https://wa.me/256702262806";
 
 		try {
@@ -244,7 +244,7 @@ class TenantsTable extends Component
 	}
 
 	private function resetForm(): void
-    {
+	{
 		$this->editId = null;
 		$this->name = '';
 		$this->contact = '';

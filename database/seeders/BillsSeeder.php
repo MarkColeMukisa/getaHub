@@ -1,0 +1,138 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class BillsSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        DB::table('bills')->insert([
+            [
+                'id' => 1,
+                'tenant_id' => 1,
+                'previous_reading' => 441,
+                'current_reading' => 443,
+                'units_used' => 2,
+                'unit_price' => 0,
+                'total_amount' => 0,
+                'month' => 'November',
+                'year' => 2025,
+                'created_at' => null,
+                'updated_at' => null,
+                'vat_amount' => 0,
+                'paye_amount' => 0,
+                'rubbish_amount' => 0,
+                'grand_total' => 0,
+            ],
+            [
+                'id' => 2,
+                'tenant_id' => 2,
+                'previous_reading' => 367,
+                'current_reading' => 371,
+                'units_used' => 4,
+                'unit_price' => 0,
+                'total_amount' => 0,
+                'month' => 'November',
+                'year' => 2025,
+                'created_at' => null,
+                'updated_at' => null,
+                'vat_amount' => 0,
+                'paye_amount' => 0,
+                'rubbish_amount' => 0,
+                'grand_total' => 0,
+            ],
+            [
+                'id' => 3,
+                'tenant_id' => 3,
+                'previous_reading' => 293,
+                'current_reading' => 295,
+                'units_used' => 2,
+                'unit_price' => 0,
+                'total_amount' => 0,
+                'month' => 'November',
+                'year' => 2025,
+                'created_at' => null,
+                'updated_at' => null,
+                'vat_amount' => 0,
+                'paye_amount' => 0,
+                'rubbish_amount' => 0,
+                'grand_total' => 0,
+            ],
+            [
+                'id' => 7,
+                'tenant_id' => 5,
+                'previous_reading' => 0,
+                'current_reading' => 2,
+                'units_used' => 2,
+                'unit_price' => 3516,
+                'total_amount' => 7032,
+                'month' => 'January',
+                'year' => 2026,
+                'created_at' => '2026-01-03 12:09:06',
+                'updated_at' => '2026-01-03 12:09:06',
+                'vat_amount' => 1266,
+                'paye_amount' => 375,
+                'rubbish_amount' => 5000,
+                'grand_total' => 13673,
+            ],
+            [
+                'id' => 8,
+                'tenant_id' => 1,
+                'previous_reading' => 443,
+                'current_reading' => 446,
+                'units_used' => 3,
+                'unit_price' => 3516,
+                'total_amount' => 10548,
+                'month' => 'January',
+                'year' => 2026,
+                'created_at' => '2026-01-03 14:12:07',
+                'updated_at' => '2026-01-03 14:12:07',
+                'vat_amount' => 1899,
+                'paye_amount' => 375,
+                'rubbish_amount' => 5000,
+                'grand_total' => 20000,
+            ],
+            [
+                'id' => 9,
+                'tenant_id' => 2,
+                'previous_reading' => 371,
+                'current_reading' => 371,
+                'units_used' => 0,
+                'unit_price' => 3516,
+                'total_amount' => 0,
+                'month' => 'January',
+                'year' => 2026,
+                'created_at' => '2026-01-03 14:15:00',
+                'updated_at' => '03/01/2026  14:15:00',
+                'vat_amount' => 0,
+                'paye_amount' => 375,
+                'rubbish_amount' => 5000,
+                'grand_total' => 6000,
+            ],
+            [
+                'id' => 10,
+                'tenant_id' => 3,
+                'previous_reading' => 295,
+                'current_reading' => 297,
+                'units_used' => 2,
+                'unit_price' => 3516,
+                'total_amount' => 7032,
+                'month' => 'January',
+                'year' => 2026,
+                'created_at' => '03/01/2026  14:16:00',
+                'updated_at' => '03/01/2026  14:16:00',
+                'vat_amount' => 1266,
+                'paye_amount' => 375,
+                'rubbish_amount' => 5000,
+                'grand_total' => 14000,
+            ],
+        ]);
+    }
+}
