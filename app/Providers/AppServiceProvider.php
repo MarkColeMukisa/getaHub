@@ -13,7 +13,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(\App\Contracts\SmsServiceInterface::class, function ($app) {
+            if (config('services.sms.mode') === 'real') {
+                return new \App\Services\RealSmsService();
+            }
+            return new \App\Services\FakeSmsService();
+        });
     }
 
     /**
@@ -21,7 +26,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Gate::define('manage-tenants', function(User $user) {
+        Gate::define('manage-tenants', function (User $user) {
             return (bool) $user->is_admin;
         });
     }

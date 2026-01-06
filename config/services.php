@@ -36,9 +36,13 @@ return [
     ],
 
     'marz' => [
+        'url' => env('MARZ_SMS_URL', 'https://sms.wearemarz.com/api/v1/sms/send'),
         'key' => env('MARZ_API_KEY'),
         'secret' => env('MARZ_API_SECRET'),
-        'url' => 'https://sms.wearemarz.com/api/v1/sms/send',
+    ],
+
+    'sms' => [
+        'mode' => env('SMS_MODE', 'fake'),
     ],
 
 ];

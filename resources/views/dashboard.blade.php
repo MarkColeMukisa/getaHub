@@ -53,6 +53,8 @@
                 </div>
                 @endif
 
+                <livewire:dashboard.stats />
+
                 <p>{{ __("You're logged in!") }}</p>
                 @can('manage-tenants')
                 <livewire:tenants-table />

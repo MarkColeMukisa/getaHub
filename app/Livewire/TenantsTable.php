@@ -3,11 +3,12 @@
 namespace App\Livewire;
 
 use App\Models\Tenant;
-use App\Services\SmsService;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\WithPagination;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 class TenantsTable extends Component
 {
@@ -52,7 +53,11 @@ class TenantsTable extends Component
 		];
 	}
 
-	public function mount()
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    public function mount()
 	{
 		$stored = session()->get('tenant_search');
 		if ($stored) {
@@ -214,7 +219,7 @@ class TenantsTable extends Component
 		$this->resetPage();
 	}
 
-	public function notify($id, SmsService $smsService)
+	public function notify($id, \App\Services\NotificationService $notificationService)
 	{
 		$this->authorize('manage-tenants');
 		$tenant = Tenant::with('latestBill')->findOrFail($id);
@@ -225,21 +230,11 @@ class TenantsTable extends Component
 			return;
 		}
 
-		$contact = trim($tenant->contact);
-		Log::info("Attempting to send SMS to {$tenant->name} at {$contact}");
-
-		$billAmount = ($latestBill->grand_total > 0) ? $latestBill->grand_total : $latestBill->total_amount;
-		$message = "Hello {$tenant->name}, Geta WaterBill Services wishes you a Happy New Year 2026! 🎆 Thank you for doing business with us. Please be informed that your bill for {$latestBill->month} {$latestBill->year} is due. Total amount: UGX " . number_format($billAmount) . ". Happy New Year!
-		For inquiries and feedback, chat with us on WhatsApp: https://wa.me/256702262806";
-
-		try {
-			$response = $smsService->send($contact, $message);
-			Log::info("SMS Response for {$tenant->name}: " . json_encode($response->getData()));
+		if ($notificationService->notify($latestBill)) {
 			$this->dispatch('celebrate');
-			session()->flash('status', "Bill notification sent to {$tenant->name} ({$contact}).");
-		} catch (\Exception $e) {
-			Log::error("SMS Error for {$tenant->name}: " . $e->getMessage());
-			session()->flash('error', "Failed to send notification to {$tenant->name}: " . $e->getMessage());
+			session()->flash('status', "Bill notification sent to {$tenant->name} ({$tenant->contact}).");
+		} else {
+			session()->flash('error', "Failed to send notification to {$tenant->name}. Check logs for details.");
 		}
 	}
 
