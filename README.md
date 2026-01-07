@@ -1,5 +1,6 @@
 <h1 align="center">GETA – Water Bill Management System</h1>
 <p align="center">Modern multi-tenant water billing & tracking application built with Laravel 12, Livewire 3, Tailwind CSS, and modern tooling.</p>
+<p align="center"><a href="https://getahub-ynmjm.sevalla.app/"><strong>Live Demo</strong></a></p>
 
 ---
 
