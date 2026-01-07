@@ -1,3 +1,9 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+    --font-sans: 'Figtree', sans-serif;
+    
+    --color-primary: #FF4500;
+    --color-secondary: #1A202C;
+    --color-accent: #4A5568;
+}
