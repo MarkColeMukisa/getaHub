@@ -1,8 +1,6 @@
-const CACHE_NAME = 'geta-v1';
+const CACHE_NAME = 'geta-v2';
 const ASSETS_TO_CACHE = [
     '/dashboard',
-    '/resources/css/app.css',
-    '/resources/js/app.js',
     '/manifest.json',
     '/pwa_icon.svg'
 ];
