@@ -5,54 +5,58 @@ import $ from 'jquery';
 window.$ = $;
 window.jQuery = $;
 
+import Alpine from 'alpinejs';
+window.Alpine = Alpine;
+Alpine.start();
+
 // DOM ready for billing UI logic (real-time toast/activity handled in realtime-activity.js)
-$(function(){
+$(function () {
   console.log('DOM ready (billing logic)');
 
-    // Auto-fetch previous reading when tenant is selected
-    $('#tenant_id').on('change', function(){
-        const tenantId = $(this).val();
-        if(!tenantId){ 
-            $('#pmReading').val('');
-            return; 
-        }
-        
-        // Fetch previous reading via AJAX
-        $.get(`/tenants/${tenantId}/previous-reading`)
-            .done(function(data){
-                $('#pmReading').val(data.previous_reading);
-                console.log('Previous reading loaded:', data.previous_reading);
-            })
-            .fail(function(){
-                console.error('Failed to fetch previous reading');
-                $('#pmReading').val('0'); // fallback
-            });
-    });
+  // Auto-fetch previous reading when tenant is selected
+  $('#tenant_id').on('change', function () {
+    const tenantId = $(this).val();
+    if (!tenantId) {
+      $('#pmReading').val('');
+      return;
+    }
 
-    // Preview logic: Generate bill preview without persisting, then allow Save
-    $('#generateBill').on('click', function(){
-        const tenantOption = $('#tenant_id option:selected');
-        const tenantId = tenantOption.val();
-        if(!tenantId){ alert('Select a tenant first.'); return; }
-        const tenantDisplay = tenantOption.text();
-        const prev = parseInt($('#pmReading').val()||'0',10);
-        const curr = parseInt($('#cmReading').val()||'0',10);
-        if(isNaN(curr) || curr < prev){ alert('Current reading must be >= previous reading.'); return; }
-        const units = curr - prev;
-        const unitPrice = 3516; // consistent with hidden input
-        const base = units * unitPrice;
-        const $config = $('#billingConfig');
-        const vatRate = parseFloat($config.data('vat'));
-        const paye = parseInt($config.data('paye'),10);
-        const rubbish = parseInt($config.data('rubbish'),10);
-        const vat = Math.round(base * vatRate);
-        const grand = base + vat + paye + rubbish;
-        $('#tableReportSection').removeClass('hidden');
-        const $tbody = $('#billReport');
-        $tbody.empty();
-        $('#grandTotalCell').text('UGX '+grand.toLocaleString());
-        $('#grandTotalRow').removeClass('hidden');
-        const rowHtml = `
+    // Fetch previous reading via AJAX
+    $.get(`/tenants/${tenantId}/previous-reading`)
+      .done(function (data) {
+        $('#pmReading').val(data.previous_reading);
+        console.log('Previous reading loaded:', data.previous_reading);
+      })
+      .fail(function () {
+        console.error('Failed to fetch previous reading');
+        $('#pmReading').val('0'); // fallback
+      });
+  });
+
+  // Preview logic: Generate bill preview without persisting, then allow Save
+  $('#generateBill').on('click', function () {
+    const tenantOption = $('#tenant_id option:selected');
+    const tenantId = tenantOption.val();
+    if (!tenantId) { alert('Select a tenant first.'); return; }
+    const tenantDisplay = tenantOption.text();
+    const prev = parseInt($('#pmReading').val() || '0', 10);
+    const curr = parseInt($('#cmReading').val() || '0', 10);
+    if (isNaN(curr) || curr < prev) { alert('Current reading must be >= previous reading.'); return; }
+    const units = curr - prev;
+    const unitPrice = 3516; // consistent with hidden input
+    const base = units * unitPrice;
+    const $config = $('#billingConfig');
+    const vatRate = parseFloat($config.data('vat'));
+    const paye = parseInt($config.data('paye'), 10);
+    const rubbish = parseInt($config.data('rubbish'), 10);
+    const vat = Math.round(base * vatRate);
+    const grand = base + vat + paye + rubbish;
+    $('#tableReportSection').removeClass('hidden');
+    const $tbody = $('#billReport');
+    $tbody.empty();
+    $('#grandTotalCell').text('UGX ' + grand.toLocaleString());
+    $('#grandTotalRow').removeClass('hidden');
+    const rowHtml = `
           <tr class="table-row border-b border-gray-200 hover:bg-gray-50 transition-all duration-300">
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
               <div class="flex items-center">
@@ -69,43 +73,43 @@ $(function(){
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${rubbish.toLocaleString()}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-primary">${grand.toLocaleString()}</td>
           </tr>`;
-        $tbody.append(rowHtml);
-        // Enable save button
-        $('#saveBill').prop('disabled', false).removeClass('bg-gray-300 cursor-not-allowed text-gray-600').addClass('btn-primary text-white').html('<span class="flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>Save Bill</span>');
-        // Store computed values in hidden inputs (add if not present)
-        if(!$('#computed_units').length){
-          $('<input>').attr({type:'hidden',id:'computed_units',name:'units_used'}).appendTo('#formDetails');
-          $('<input>').attr({type:'hidden',id:'computed_previous',name:'previous_reading'}).appendTo('#formDetails');
-        }
-        $('#computed_units').val(units);
-        $('#computed_previous').val(prev);
-    });
-    // On reset disable Save again and hide section
-    $('#resetButton').on('click', function(){
-        $('#saveBill').prop('disabled', true).removeClass('btn-primary text-white').addClass('bg-gray-300 cursor-not-allowed text-gray-600').html('<span class="flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>Save Bill</span>');
-        $('#tableReportSection').addClass('hidden');
-        $('#billReport').empty();
-        $('#grandTotalRow').addClass('hidden');
-    });
-
-    // Modern jQuery version
-$(function () {
-  $("#resetButton").on("click", function (event) {
-    event.preventDefault();
-
-    if (window.isLoading) return;
-
-    // Confirm reset if there are rows
-    if ($("#billReport tr").length > 0 && 
-        !confirm("Are you sure you want to reset the form? This will clear all generated bills.")) {
-      return;
+    $tbody.append(rowHtml);
+    // Enable save button
+    $('#saveBill').prop('disabled', false).removeClass('bg-gray-300 cursor-not-allowed text-gray-600').addClass('btn-primary text-white').html('<span class="flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>Save Bill</span>');
+    // Store computed values in hidden inputs (add if not present)
+    if (!$('#computed_units').length) {
+      $('<input>').attr({ type: 'hidden', id: 'computed_units', name: 'units_used' }).appendTo('#formDetails');
+      $('<input>').attr({ type: 'hidden', id: 'computed_previous', name: 'previous_reading' }).appendTo('#formDetails');
     }
+    $('#computed_units').val(units);
+    $('#computed_previous').val(prev);
+  });
+  // On reset disable Save again and hide section
+  $('#resetButton').on('click', function () {
+    $('#saveBill').prop('disabled', true).removeClass('btn-primary text-white').addClass('bg-gray-300 cursor-not-allowed text-gray-600').html('<span class="flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>Save Bill</span>');
+    $('#tableReportSection').addClass('hidden');
+    $('#billReport').empty();
+    $('#grandTotalRow').addClass('hidden');
+  });
 
-    const $button = $(this);
-    const originalText = $button.html();
+  // Modern jQuery version
+  $(function () {
+    $("#resetButton").on("click", function (event) {
+      event.preventDefault();
 
-    // Show loading spinner
-    $button.html(`
+      if (window.isLoading) return;
+
+      // Confirm reset if there are rows
+      if ($("#billReport tr").length > 0 &&
+        !confirm("Are you sure you want to reset the form? This will clear all generated bills.")) {
+        return;
+      }
+
+      const $button = $(this);
+      const originalText = $button.html();
+
+      // Show loading spinner
+      $button.html(`
       <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -113,31 +117,31 @@ $(function () {
       Resetting...
     `).prop("disabled", true);
 
-    setTimeout(() => {
-      // Reset form and hide report
-      $("#formDetails")[0].reset();
-      $("#billReport").empty();
-      $("#tableReport").slideUp(400);
+      setTimeout(() => {
+        // Reset form and hide report
+        $("#formDetails")[0].reset();
+        $("#billReport").empty();
+        $("#tableReport").slideUp(400);
 
-      // Clear errors
-      $(".form-input")
-        .removeClass("border-red-500")
-        .addClass("border-gray-300");
-      $(".error-message").remove();
+        // Clear errors
+        $(".form-input")
+          .removeClass("border-red-500")
+          .addClass("border-gray-300");
+        $(".error-message").remove();
 
-      // Success notification
-      if (typeof showNotification === "function") {
-        showNotification("Form has been reset successfully!", "success");
-      }
+        // Success notification
+        if (typeof showNotification === "function") {
+          showNotification("Form has been reset successfully!", "success");
+        }
 
-      // Restore button
-      $button.html(originalText).prop("disabled", false);
+        // Restore button
+        $button.html(originalText).prop("disabled", false);
 
-      // Smooth scroll to top
-      $("html, body").animate({ scrollTop: 0 }, 600);
-    }, 800);
+        // Smooth scroll to top
+        $("html, body").animate({ scrollTop: 0 }, 600);
+      }, 800);
+    });
   });
-});
 
 });
 

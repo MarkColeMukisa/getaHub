@@ -10,6 +10,20 @@ export default defineConfig({
         }),
         tailwindcss(),
     ],
+    build: {
+        rollupOptions: {
+            output: {
+                entryFileNames: 'js/[name]-[hash].js',
+                chunkFileNames: 'js/[name]-[hash].js',
+                assetFileNames: (assetInfo) => {
+                    if (assetInfo.name && assetInfo.name.endsWith('.css')) {
+                        return 'css/[name]-[hash][extname]';
+                    }
+                    return 'assets/[name]-[hash][extname]';
+                },
+            },
+        },
+    },
     server: {
         // Ensure Vite serves on IPv4 localhost so the browser loads modules from 127.0.0.1
         host: '127.0.0.1',
