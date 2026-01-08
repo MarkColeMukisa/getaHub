@@ -43,6 +43,7 @@ return [
 
     'sms' => [
         'mode' => env('SMS_MODE', 'fake'),
+        'test_number' => env('SMS_TEST_NUMBER'),
     ],
 
 ];

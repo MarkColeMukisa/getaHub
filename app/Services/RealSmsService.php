@@ -14,6 +14,7 @@ class RealSmsService implements SmsServiceInterface
      */
     public function send(string $recipient, string $message): \Illuminate\Http\JsonResponse
     {
+
         $response = Http::withBasicAuth(
             config('services.marz.key'),
             config('services.marz.secret')

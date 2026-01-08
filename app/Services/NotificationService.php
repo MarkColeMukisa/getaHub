@@ -13,38 +13,7 @@ class NotificationService
         protected SmsServiceInterface $smsService
     ) {}
 
-    /**
-     * Process all pending notifications that haven't reached max attempts.
-     */
-    public function processPendingNotifications(): array
-    {
-        $bills = Bill::with('tenant')
-            ->whereNull('notified_at')
-            ->where('notification_attempts', '<', 3)
-            ->get();
 
-        $stats = [
-            'total' => $bills->count(),
-            'success' => 0,
-            'failed' => 0,
-            'skipped' => 0,
-        ];
-
-        foreach ($bills as $bill) {
-            try {
-                if ($this->notify($bill)) {
-                    $stats['success']++;
-                } else {
-                    $stats['failed']++;
-                }
-            } catch (\Exception $e) {
-                Log::error("Critical error processing notification for bill ID {$bill->id}: " . $e->getMessage());
-                $stats['failed']++;
-            }
-        }
-
-        return $stats;
-    }
 
     /**
      * Notify a specific tenant about a bill.
