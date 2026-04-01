@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Livewire\Dashboard;
 
 use App\Models\Bill;
@@ -28,7 +30,7 @@ class Stats extends Component
         ];
 
         return view('livewire.dashboard.stats', [
-            'stats' => $stats
+            'stats' => $stats,
         ]);
     }
 }

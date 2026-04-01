@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
-use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -40,6 +41,6 @@ class TenantTest extends TestCase
         ]);
 
         $response->assertForbidden();
-        $this->assertDatabaseMissing('tenants', [ 'name' => 'Blocked Tenant' ]);
+        $this->assertDatabaseMissing('tenants', ['name' => 'Blocked Tenant']);
     }
 }

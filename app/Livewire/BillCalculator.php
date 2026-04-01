@@ -1,42 +1,59 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Livewire;
 
 use App\Models\Bill;
 use App\Models\Tenant;
 use Livewire\Component;
-use Illuminate\Support\Facades\Log;
 
 class BillCalculator extends Component
 {
     public bool $showModal = false;
-    public $tenant_id = null;
+
+    public $tenant_id;
+
     public $previous_reading = 0;
+
     public $current_reading = '';
+
     public $month = '';
+
     public $unit_price = 3516;
 
-    public $preview = null;
+    public $preview;
 
     protected $listeners = [
         'open-bill-calc-modal' => 'openModal',
     ];
 
-    public function mount()
+    public function mount(): void
     {
         $this->month = now()->format('F');
     }
 
-    public function openModal()
+    public function openModal(): void
     {
+        logger('openModal called');
         $this->resetForm();
         $this->showModal = true;
+        logger('showModal set to: '.$this->showModal);
     }
 
-    public function updatedTenantId($value)
+    public function openBillCalcModal(): void
     {
-        if (!$value) {
+        logger('openBillCalcModal called');
+        $this->resetForm();
+        $this->showModal = true;
+        logger('showModal set to: '.$this->showModal);
+    }
+
+    public function updatedTenantId($value): void
+    {
+        if (! $value) {
             $this->previous_reading = 0;
+
             return;
         }
 
@@ -44,11 +61,13 @@ class BillCalculator extends Component
         $this->previous_reading = $lastBill?->current_reading ?? 0;
     }
 
-    public function generatePreview()
+    public function generatePreview(): void
     {
+        $this->authorize('manage-tenants');
+
         $this->validate([
             'tenant_id' => 'required|exists:tenants,id',
-            'current_reading' => 'required|numeric|min:' . $this->previous_reading,
+            'current_reading' => 'required|numeric|min:'.$this->previous_reading,
             'month' => 'required|string',
         ]);
 
@@ -76,11 +95,13 @@ class BillCalculator extends Component
         ];
     }
 
-    public function saveBill()
+    public function saveBill(): void
     {
+        $this->authorize('manage-tenants');
+
         $this->generatePreview(); // Re-validate and ensure preview is up to date
 
-        $bill = Bill::create([
+        Bill::create([
             'tenant_id' => $this->tenant_id,
             'previous_reading' => $this->previous_reading,
             'current_reading' => $this->current_reading,
@@ -104,7 +125,7 @@ class BillCalculator extends Component
         session()->flash('status', 'Bill saved successfully.');
     }
 
-    public function resetForm()
+    public function resetForm(): void
     {
         $this->tenant_id = null;
         $this->previous_reading = 0;
@@ -116,7 +137,7 @@ class BillCalculator extends Component
     public function render()
     {
         return view('livewire.bill-calculator', [
-            'tenants' => Tenant::orderBy('name')->get()
+            'tenants' => Tenant::orderBy('name')->get(),
         ]);
     }
 }

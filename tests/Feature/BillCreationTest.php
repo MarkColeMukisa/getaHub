@@ -1,13 +1,13 @@
 <?php
 
-use App\Models\User;
-use App\Models\Tenant;
 use App\Models\Bill;
+use App\Models\Tenant;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('creates a bill using last bill current reading as previous', function(){
+it('creates a bill using last bill current reading as previous', function () {
     $user = User::factory()->create(['is_admin' => true]);
     $tenant = Tenant::factory()->create();
     $first = Bill::factory()->create(['tenant_id' => $tenant->id, 'previous_reading' => 0, 'current_reading' => 100, 'units_used' => 100]);
@@ -29,7 +29,7 @@ it('creates a bill using last bill current reading as previous', function(){
     ]);
 });
 
-it('rejects bill when current less than previous', function(){
+it('rejects bill when current less than previous', function () {
     $user = User::factory()->create(['is_admin' => true]);
     $tenant = Tenant::factory()->create();
     Bill::factory()->create(['tenant_id' => $tenant->id, 'previous_reading' => 0, 'current_reading' => 200, 'units_used' => 200]);

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreUserRequest;
@@ -11,8 +13,9 @@ class AdminUserController extends Controller
 {
     public function index()
     {
-        $users = \App\Models\User::latest()->get();
-        return view('dashboard', compact('users'));
+        $users = User::latest()->get();
+
+        return view('dashboard', ['users' => $users]);
     }
 
     public function store(StoreUserRequest $request)

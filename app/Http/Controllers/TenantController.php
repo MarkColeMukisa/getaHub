@@ -1,17 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreTenantRequest;
 use App\Http\Requests\UpdateTenantRequest;
 use App\Models\Tenant;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\RedirectResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TenantController extends Controller
 {
     use AuthorizesRequests;
-    public function index(): \Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory
+
+    public function index(): View|Application|Factory
     {
         // Dashboard is accessible to all authenticated users; a tenants section itself is gated in Blade.
         return view('dashboard');
@@ -20,44 +29,47 @@ class TenantController extends Controller
     /**
      * @throws AuthorizationException
      */
-    public function store(StoreTenantRequest $request): \Illuminate\Http\RedirectResponse
+    public function store(StoreTenantRequest $request): RedirectResponse
     {
-    $this->authorize('manage-tenants');
+        $this->authorize('manage-tenants');
         $tenant = Tenant::create($request->validated());
+
         return redirect()->route('dashboard')->with('status', 'Tenant '.$tenant->name.' created');
     }
 
     /**
      * @throws AuthorizationException
      */
-    public function update(UpdateTenantRequest $request, Tenant $tenant): \Illuminate\Http\RedirectResponse
+    public function update(UpdateTenantRequest $request, Tenant $tenant): RedirectResponse
     {
-    $this->authorize('manage-tenants');
+        $this->authorize('manage-tenants');
         $tenant->update($request->validated());
+
         return redirect()->route('dashboard')->with('status', 'Tenant '.$tenant->name.' updated');
     }
 
     /**
      * @throws AuthorizationException
      */
-    public function destroy(Tenant $tenant): \Illuminate\Http\RedirectResponse
+    public function destroy(Tenant $tenant): RedirectResponse
     {
-    $this->authorize('manage-tenants');
+        $this->authorize('manage-tenants');
         $name = $tenant->name;
         $tenant->delete();
+
         return redirect()->route('dashboard')->with('status', 'Tenant '.$name.' deleted');
     }
 
     /**
      * @throws AuthorizationException
      */
-    public function exportCsv(): \Symfony\Component\HttpFoundation\StreamedResponse
+    public function exportCsv(): StreamedResponse
     {
-    $this->authorize('manage-tenants');
+        $this->authorize('manage-tenants');
         $query = $this->baseFilteredQuery();
         [$sort, $direction] = $this->resolveSort();
         $query->orderBy($sort, $direction);
-        $tenants = $query->get(['id','name','contact','room_number','created_at']);
+        $tenants = $query->get(['id', 'name', 'contact', 'room_number', 'created_at']);
 
         $filename = 'tenants_export_'.now()->format('Ymd_His').'.csv';
         $headers = [
@@ -65,9 +77,9 @@ class TenantController extends Controller
             'Content-Disposition' => "attachment; filename=\"$filename\"",
         ];
 
-        $callback = function() use ($tenants) {
+        $callback = function () use ($tenants) {
             $out = fopen('php://output', 'w');
-            fputcsv($out, ['ID','Name','Contact','Room','Created At']);
+            fputcsv($out, ['ID', 'Name', 'Contact', 'Room', 'Created At']);
             foreach ($tenants as $t) {
                 fputcsv($out, [
                     $t->id,
@@ -79,10 +91,17 @@ class TenantController extends Controller
             }
             fclose($out);
         };
+
         return response()->stream($callback, 200, $headers);
     }
 
-    private function baseFilteredQuery(): \Illuminate\Database\Eloquent\Builder
-    { return Tenant::query(); }
-    private function resolveSort(): array { return ['created_at','desc']; }
+    private function baseFilteredQuery(): Builder
+    {
+        return Tenant::query();
+    }
+
+    private function resolveSort(): array
+    {
+        return ['created_at', 'desc'];
+    }
 }

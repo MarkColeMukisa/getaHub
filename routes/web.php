@@ -1,27 +1,36 @@
 <?php
 
+use App\Http\Controllers\BillController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SmsController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TenantController;
-use App\Http\Controllers\BillController;
+use App\Models\Bill;
+use App\Models\Tenant;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    $tenants = \App\Models\Tenant::orderBy('name')->get();
-    $bills = \App\Models\Bill::with('tenant')->latest('id')->limit(50)->get();
+Route::get('test', function (): never {
+    dd('test');
+});
+
+Route::get('/', function (): Factory|View {
+    $tenants = Tenant::orderBy('name')->get();
+    $bills = Bill::with('tenant')->latest('id')->limit(50)->get();
 
     // Server-side calculations for presentation
     $vatRate = config('billing.vat_rate');
     $payeFixed = config('billing.paye_amount');
     $rubbishFee = config('billing.rubbish_fee');
-    $billRows = $bills->map(function ($bill) use ($vatRate, $payeFixed, $rubbishFee) {
+    $billRows = $bills->map(function ($bill) use ($vatRate, $payeFixed, $rubbishFee): array {
         $base = $bill->total_amount; // persisted base (units * unit price)
         $vat = (int) round($base * $vatRate);
         $paye = $payeFixed;
         $rubbish = $rubbishFee;
         $grand = $base + $vat + $paye + $rubbish;
+
         return [
-            'tenant_display' => $bill->tenant->name . ' (Room ' . $bill->tenant->room_number . ')',
+            'tenant_display' => $bill->tenant->name.' (Room '.$bill->tenant->room_number.')',
             'previous_reading' => $bill->previous_reading,
             'current_reading' => $bill->current_reading,
             'units_used' => $bill->units_used,
@@ -32,7 +41,7 @@ Route::get('/', function () {
     });
     $grandTotal = $billRows->sum('grand_total');
 
-    return view('index', compact('tenants', 'billRows', 'grandTotal'));
+    return view('index', ['tenants' => $tenants, 'billRows' => $billRows, 'grandTotal' => $grandTotal]);
 });
 
 // Redirect /index to root for consistency
@@ -63,4 +72,4 @@ Route::middleware(['auth', 'can:manage-tenants'])->group(function () {
 
 // Route::get('/send', [SmsController::class, 'send']);
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

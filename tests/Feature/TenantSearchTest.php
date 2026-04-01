@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
 use App\Models\Tenant;
@@ -18,11 +20,11 @@ class TenantSearchTest extends TestCase
         Tenant::factory()->create(['name' => 'Bob Smith', 'contact' => '222', 'room_number' => 'B2']);
         Tenant::factory()->create(['name' => 'Charlie', 'contact' => '333', 'room_number' => 'C3']);
 
-    $response = $this->actingAs($user)->get(route('dashboard', ['search' => 'Bob']));
-    $response->assertStatus(200);
-    $response->assertSee('Bob Smith');
-    $response->assertDontSee('Alice Johnson');
-    $response->assertDontSee('Charlie');
+        $response = $this->actingAs($user)->get(route('dashboard', ['search' => 'Bob']));
+        $response->assertStatus(200);
+        $response->assertSee('Bob Smith');
+        $response->assertDontSee('Alice Johnson');
+        $response->assertDontSee('Charlie');
     }
 
     public function test_non_admin_cannot_access_dashboard(): void

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
 use App\Models\Tenant;
@@ -25,7 +27,7 @@ class TenantExportTest extends TestCase
         ]));
 
         $response->assertOk();
-    $this->assertStringStartsWith('text/csv', $response->headers->get('Content-Type'));
+        $this->assertStringStartsWith('text/csv', $response->headers->get('Content-Type'));
         $content = $response->streamedContent();
         $this->assertStringContainsString('Alpha', $content);
         $this->assertStringContainsString('Gamma', $content);

@@ -5,9 +5,10 @@ import $ from 'jquery';
 window.$ = $;
 window.jQuery = $;
 
-import Alpine from 'alpinejs';
-window.Alpine = Alpine;
-Alpine.start();
+// Alpine.js is handled by Livewire v3+
+// import Alpine from 'alpinejs';
+// window.Alpine = Alpine;
+// Alpine.start();
 
 // DOM ready for billing UI logic (real-time toast/activity handled in realtime-activity.js)
 $(function () {

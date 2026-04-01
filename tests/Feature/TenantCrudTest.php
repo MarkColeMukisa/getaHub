@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
 use App\Models\Tenant;
@@ -38,7 +40,7 @@ class TenantCrudTest extends TestCase
 
         $response = $this->actingAs($user)->delete(route('tenants.destroy', $tenant));
         $response->assertRedirect(route('dashboard'));
-        $this->assertDatabaseMissing('tenants', [ 'id' => $tenant->id ]);
+        $this->assertDatabaseMissing('tenants', ['id' => $tenant->id]);
     }
 
     public function test_non_admin_cannot_update_tenant(): void

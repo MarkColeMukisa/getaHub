@@ -1,14 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class StoreUserRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return \Illuminate\Support\Facades\Auth::check();
+        return Auth::check();
     }
 
     public function rules(): array

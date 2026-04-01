@@ -15,5 +15,5 @@ it('broadcasts on public.metrics with alias bill.created', function () {
         ->and($channels[0]->name)->toBe('public.metrics')
         ->and($event->broadcastAs())->toBe('bill.created')
         ->and($event->broadcastWith())
-            ->id->toBe($bill->id);
+        ->id->toBe($bill->id);
 });

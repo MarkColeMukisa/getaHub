@@ -2,15 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class BillsSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         DB::table('bills')->insert([
@@ -134,5 +130,22 @@ class BillsSeeder extends Seeder
                 'grand_total' => 14000,
             ],
         ]);
+
+        $this->syncBillIdSequence();
+    }
+
+    private function syncBillIdSequence(): void
+    {
+        if (DB::getDriverName() !== 'pgsql') {
+            return;
+        }
+
+        DB::statement("
+            SELECT setval(
+                pg_get_serial_sequence('bills', 'id'),
+                COALESCE((SELECT MAX(id) FROM bills), 1),
+                (SELECT MAX(id) IS NOT NULL FROM bills)
+            )
+        ");
     }
 }

@@ -1,18 +1,22 @@
 <?php
 
-use App\Models\User;
-use App\Models\Tenant;
 use App\Models\Bill;
+use App\Models\Tenant;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('renders correct calculated totals on index page', function(){
+it('renders correct calculated totals on index page', function () {
     $user = User::factory()->create();
     $tenant = Tenant::factory()->create(['room_number' => 'A1']);
 
     // base: units_used * unit_price
-    $previous = 50; $current = 130; $units = $current - $previous; $unitPrice = 3516; $base = $units * $unitPrice;
+    $previous = 50;
+    $current = 130;
+    $units = $current - $previous;
+    $unitPrice = 3516;
+    $base = $units * $unitPrice;
 
     Bill::factory()->create([
         'tenant_id' => $tenant->id,

@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
+use App\Events\BillCreated;
 use App\Http\Requests\BillStoreRequest;
 use App\Models\Bill;
 use App\Models\Tenant;
-use App\Events\BillCreated;
 
 class BillController extends Controller
 {
@@ -18,7 +20,7 @@ class BillController extends Controller
         $vatRate = config('billing.vat_rate');
         $payeFixed = config('billing.paye_amount');
         $rubbishFee = config('billing.rubbish_fee');
-        $billRows = $bills->map(function ($bill) use ($vatRate, $payeFixed, $rubbishFee) {
+        $billRows = $bills->map(function ($bill) use ($vatRate, $payeFixed, $rubbishFee): array {
             $base = $bill->total_amount;
             $vat = ($bill->vat_amount > 0) ? $bill->vat_amount : (int) round($base * $vatRate);
             $paye = ($bill->paye_amount > 0) ? $bill->paye_amount : $payeFixed;
@@ -26,7 +28,7 @@ class BillController extends Controller
             $grand = ($bill->grand_total > 0) ? $bill->grand_total : ($base + $vat + $paye + $rubbish);
 
             return [
-                'tenant_display' => $bill->tenant->name . ' (Room ' . $bill->tenant->room_number . ')',
+                'tenant_display' => $bill->tenant->name.' (Room '.$bill->tenant->room_number.')',
                 'previous_reading' => $bill->previous_reading,
                 'current_reading' => $bill->current_reading,
                 'units_used' => $bill->units_used,
@@ -37,7 +39,7 @@ class BillController extends Controller
         });
         $grandTotal = $billRows->sum('grand_total');
 
-        return view('index', compact('tenants', 'billRows', 'grandTotal'));
+        return view('index', ['tenants' => $tenants, 'billRows' => $billRows, 'grandTotal' => $grandTotal]);
     }
 
     public function store(BillStoreRequest $request)
@@ -48,7 +50,7 @@ class BillController extends Controller
         $lastBill = Bill::where('tenant_id', $tenant->id)->latest('id')->first();
         $previousReading = $lastBill?->current_reading ?? 0;
 
-        $current = (int)$request->current_reading;
+        $current = (int) $request->current_reading;
         if ($current < $previousReading) {
             return back()->withErrors(['current_reading' => 'Current reading cannot be less than previous reading.'])->withInput();
         }
@@ -71,12 +73,14 @@ class BillController extends Controller
             'year' => $year,
         ]);
         BillCreated::dispatch($bill);
+
         return redirect()->back()->with('bill_created', $bill->id);
     }
 
     public function previousReading(Tenant $tenant)
     {
         $lastBill = Bill::where('tenant_id', $tenant->id)->latest('id')->first();
+
         return response()->json([
             'previous_reading' => $lastBill?->current_reading ?? 0,
         ]);

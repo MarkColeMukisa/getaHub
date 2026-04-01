@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Contracts\SmsServiceInterface;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
 class FakeSmsService implements SmsServiceInterface
@@ -10,7 +13,7 @@ class FakeSmsService implements SmsServiceInterface
     /**
      * Log the SMS message instead of sending it.
      */
-    public function send(string $recipient, string $message): \Illuminate\Http\JsonResponse
+    public function send(string $recipient, string $message): JsonResponse
     {
         Log::info("FAKE SMS to {$recipient}: {$message}");
 
@@ -20,8 +23,8 @@ class FakeSmsService implements SmsServiceInterface
             'data' => [
                 'recipient' => $recipient,
                 'message' => $message,
-                'mode' => 'fake'
-            ]
+                'mode' => 'fake',
+            ],
         ]);
     }
 }

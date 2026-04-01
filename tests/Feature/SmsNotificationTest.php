@@ -1,12 +1,10 @@
 <?php
 
+use App\Contracts\SmsServiceInterface;
+use App\Jobs\AutomateSmsNotificationsJob;
 use App\Models\Bill;
 use App\Models\Tenant;
 use App\Services\NotificationService;
-use App\Contracts\SmsServiceInterface;
-use App\Jobs\AutomateSmsNotificationsJob;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -14,7 +12,7 @@ uses(RefreshDatabase::class);
 beforeEach(function () {
     $this->tenant = Tenant::factory()->create([
         'name' => 'Test Tenant',
-        'contact' => '0702262806'
+        'contact' => '0702262806',
     ]);
 
     $this->bill = Bill::factory()->create([
@@ -22,7 +20,7 @@ beforeEach(function () {
         'grand_total' => 50000,
         'month' => 'January',
         'year' => 2026,
-        'notified_at' => null
+        'notified_at' => null,
     ]);
 });
 
@@ -64,7 +62,7 @@ it('automates notifications via job', function () {
     // Bind mock to container for the job to pick up
     $this->app->instance(SmsServiceInterface::class, $smsMock);
 
-    (new AutomateSmsNotificationsJob())->handle(app(NotificationService::class));
+    (new AutomateSmsNotificationsJob)->handle(app(NotificationService::class));
 
     $this->bill->refresh();
     expect($this->bill->notified_at)->not->toBeNull();

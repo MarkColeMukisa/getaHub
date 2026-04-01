@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Livewire;
 
 use App\Models\Bill;
@@ -12,7 +14,9 @@ class TenantBillHistory extends Component
     use WithPagination;
 
     public ?int $tenantId = null;
+
     public bool $show = false;
+
     public string $tenantName = '';
 
     protected $listeners = [
@@ -29,7 +33,7 @@ class TenantBillHistory extends Component
     {
         $tenantModel = Tenant::findOrFail($tenant);
         $this->tenantId = $tenantModel->id;
-        $this->tenantName = $tenantModel->name . ' (Room ' . $tenantModel->room_number . ')';
+        $this->tenantName = $tenantModel->name.' (Room '.$tenantModel->room_number.')';
         $this->resetPage();
         $this->show = true;
     }
@@ -41,7 +45,10 @@ class TenantBillHistory extends Component
 
     public function getBillsProperty()
     {
-        if (!$this->tenantId) return collect();
+        if (! $this->tenantId) {
+            return collect();
+        }
+
         return Bill::where('tenant_id', $this->tenantId)
             ->latest('id')
             ->paginate(10);
@@ -55,7 +62,7 @@ class TenantBillHistory extends Component
 
         $mapped = collect();
         if ($this->tenantId) {
-            $mapped = $this->bills->getCollection()->map(function ($bill) use ($vatRate, $paye, $rubbish) {
+            $mapped = $this->bills->getCollection()->map(function ($bill) use ($vatRate, $paye, $rubbish): array {
                 $base = $bill->total_amount;
                 $vat = ($bill->vat_amount > 0) ? $bill->vat_amount : (int) round($base * $vatRate);
                 $p = ($bill->paye_amount > 0) ? $bill->paye_amount : $paye;

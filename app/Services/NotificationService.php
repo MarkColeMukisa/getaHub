@@ -1,11 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Contracts\SmsServiceInterface;
 use App\Models\Bill;
+use App\Models\Tenant;
+use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Carbon;
 
 class NotificationService
 {
@@ -13,32 +17,31 @@ class NotificationService
         protected SmsServiceInterface $smsService
     ) {}
 
-
-
     /**
      * Notify a specific tenant about a bill.
      */
     public function notify(Bill $bill): bool
     {
         $tenant = $bill->tenant;
-        if (!$tenant || empty($tenant->contact)) {
+        if (! $tenant || empty($tenant->contact)) {
             $bill->update([
                 'notification_error' => 'Missing contact information',
                 'notification_attempts' => $bill->notification_attempts + 1,
             ]);
+
             return false;
         }
 
         $message = $this->prepareMessage($bill);
-        $contact = trim($tenant->contact);
+        $contact = trim((string) $tenant->contact);
 
         try {
-            /** @var \Illuminate\Http\JsonResponse $response */
+            /** @var JsonResponse $response */
             $response = $this->smsService->send($contact, $message);
             $responseData = $response->getData(true);
 
             if ($response->status() >= 400) {
-                throw new \Exception("SMS API returned status " . $response->status() . ": " . json_encode($responseData));
+                throw new Exception('SMS API returned status '.$response->status().': '.json_encode($responseData));
             }
 
             $bill->update([
@@ -48,8 +51,8 @@ class NotificationService
             ]);
 
             return true;
-        } catch (\Exception $e) {
-            Log::error("SMS notification failed for tenant {$tenant->name}: " . $e->getMessage());
+        } catch (Exception $e) {
+            Log::error("SMS notification failed for tenant {$tenant->name}: ".$e->getMessage());
 
             $bill->update([
                 'notification_error' => $e->getMessage(),
@@ -69,7 +72,10 @@ class NotificationService
         $amount = $bill->grand_total > 0 ? $bill->grand_total : $bill->total_amount;
         $formattedAmount = number_format($amount);
 
-        return "Hello {$tenant->name}, Geta WaterBill Services wishes you a Happy New Year 2026! 🎆 Thank you for doing business with us. Please be informed that your bill for {$bill->month} {$bill->year} is due. Total amount: UGX {$formattedAmount}. Happy New Year! For inquiries, WhatsApp: https://wa.me/256702262806";
+        return "Hello {$tenant->name}, 
+        Geta WaterBill Services informs you that your bill for 
+        {$bill->month} {$bill->year} is due. Total amount: UGX {$formattedAmount}. 
+        For inquiries, WhatsApp Cole behind the scenes: https://wa.me/256702262806";
     }
 
     /**
@@ -82,14 +88,14 @@ class NotificationService
 
         return [
             'timestamp' => $now->toDateTimeString(),
-            'total_tenants' => \App\Models\Tenant::count(),
+            'total_tenants' => Tenant::count(),
             'total_bills' => Bill::count(),
             'notified_today' => Bill::whereBetween('notified_at', [$startOfDay, $now])->count(),
             'total_pending' => Bill::whereNull('notified_at')->count(),
             'failed_notifications' => Bill::whereNotNull('notification_error')
                 ->whereNull('notified_at')
                 ->get()
-                ->map(fn($b) => [
+                ->map(fn ($b) => [
                     'tenant' => $b->tenant->name,
                     'reason' => $b->notification_error,
                     'attempts' => $b->notification_attempts,

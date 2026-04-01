@@ -6,15 +6,15 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-     public $withinTransaction = false;
-     
+    public $withinTransaction = false;
+
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            if (!Schema::hasColumn('users', 'contact')) {
+            if (! Schema::hasColumn('users', 'contact')) {
                 $table->string('contact')->nullable()->after('email');
             }
-            if (!Schema::hasColumn('users', 'room_number')) {
+            if (! Schema::hasColumn('users', 'room_number')) {
                 $table->string('room_number')->nullable()->after('contact');
             }
         });

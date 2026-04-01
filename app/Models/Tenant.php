@@ -1,9 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Tenant extends Model
 {
@@ -11,15 +15,15 @@ class Tenant extends Model
 
     // Attributes are mass-assignable via $fillable; rely on Eloquent's built-in create().
     protected $fillable = [
-        'name', 'contact', 'room_number'
+        'name', 'contact', 'room_number',
     ];
 
-    public function bills(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function bills(): HasMany
     {
         return $this->hasMany(Bill::class);
     }
 
-    public function latestBill(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function latestBill(): HasOne
     {
         return $this->hasOne(Bill::class)->latestOfMany();
     }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Livewire;
 
 use App\Models\User;
@@ -9,12 +11,16 @@ use Livewire\WithPagination;
 
 class UsersTable extends Component
 {
-    use WithPagination, AuthorizesRequests;
+    use AuthorizesRequests, WithPagination;
 
     public string $search = '';
+
     public string $sort = 'created_at';
+
     public string $direction = 'desc';
+
     public ?int $confirmUserId = null;
+
     public string $confirmAction = '';
 
     protected $queryString = [
@@ -61,14 +67,16 @@ class UsersTable extends Component
     public function execute(): void
     {
         $this->authorize('manage-tenants');
-        if (!$this->confirmUserId || !$this->confirmAction) return;
+        if (! $this->confirmUserId || ! $this->confirmAction) {
+            return;
+        }
         $target = User::findOrFail($this->confirmUserId);
 
         if ($this->confirmAction === 'promote') {
-            if (!$target->is_admin) {
+            if (! $target->is_admin) {
                 $target->is_admin = true;
                 $target->save();
-                session()->flash('status', $target->email . ' promoted to admin');
+                session()->flash('status', $target->email.' promoted to admin');
             }
         } elseif ($this->confirmAction === 'demote') {
             if ($target->is_admin) {
@@ -78,7 +86,7 @@ class UsersTable extends Component
                 } else {
                     $target->is_admin = false;
                     $target->save();
-                    session()->flash('status', $target->email . ' demoted.');
+                    session()->flash('status', $target->email.' demoted.');
                 }
             }
         }
@@ -89,8 +97,8 @@ class UsersTable extends Component
     public function render()
     {
         $query = User::query();
-        if ($this->search) {
-            $s = '%' . $this->search . '%';
+        if ($this->search !== '' && $this->search !== '0') {
+            $s = '%'.$this->search.'%';
             $query->where(function ($q) use ($s) {
                 $q->where('name', 'like', $s)
                     ->orWhere('email', 'like', $s);
@@ -98,6 +106,7 @@ class UsersTable extends Component
         }
         $users = $query->orderBy($this->sort, $this->direction)->paginate(10);
         $adminCount = User::where('is_admin', true)->count();
+
         return view('livewire.users-table', [
             'users' => $users,
             'adminCount' => $adminCount,

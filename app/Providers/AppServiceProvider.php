@@ -1,10 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Gate;
+use App\Contracts\SmsServiceInterface;
 use App\Models\User;
+use App\Services\FakeSmsService;
+use App\Services\RealSmsService;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -13,11 +18,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(\App\Contracts\SmsServiceInterface::class, function ($app) {
+        $this->app->bind(function ($app): SmsServiceInterface {
             if (config('services.sms.mode') === 'real') {
-                return new \App\Services\RealSmsService();
+                return new RealSmsService;
             }
-            return new \App\Services\FakeSmsService();
+
+            return new FakeSmsService;
         });
     }
 
@@ -26,8 +32,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Gate::define('manage-tenants', function (User $user) {
-            return (bool) $user->is_admin;
-        });
+        Gate::define('manage-tenants', fn (User $user) => (bool) $user->is_admin);
     }
 }

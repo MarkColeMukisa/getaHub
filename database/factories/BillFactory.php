@@ -16,6 +16,7 @@ class BillFactory extends Factory
         $units = $this->faker->numberBetween(0, 500);
         $current = $previous + $units;
         $unitPrice = 3516;
+
         return [
             'tenant_id' => Tenant::factory(),
             'previous_reading' => $previous,

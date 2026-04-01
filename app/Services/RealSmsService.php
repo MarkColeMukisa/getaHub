@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Contracts\SmsServiceInterface;
-use Illuminate\Http\Client\Response;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -12,7 +14,7 @@ class RealSmsService implements SmsServiceInterface
     /**
      * Send a real SMS message via service provider.
      */
-    public function send(string $recipient, string $message): \Illuminate\Http\JsonResponse
+    public function send(string $recipient, string $message): JsonResponse
     {
 
         $response = Http::withBasicAuth(
@@ -23,7 +25,7 @@ class RealSmsService implements SmsServiceInterface
             'message' => $message,
         ]);
 
-        Log::info("Real SMS sending to {$recipient}: " . ($response->successful() ? 'Success' : 'Failed') . " - " . $response->body());
+        Log::info("Real SMS sending to {$recipient}: ".($response->successful() ? 'Success' : 'Failed').' - '.$response->body());
 
         return response()->json($response->json(), $response->status());
     }

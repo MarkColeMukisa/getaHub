@@ -11,7 +11,11 @@
                     <div class="flex items-center gap-2">
                         <!-- Desktop Actions -->
                         <div class="hidden sm:flex items-center gap-2">
-                            <button x-data @click="$dispatch('open-bill-calc-modal')" class="inline-flex items-center px-4 py-2 bg-orange-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-orange-500 active:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">Bill Calculator</button>
+                            @can('manage-tenants')
+                            <button x-data @click="$dispatch('open-bill-calc-modal')" type="button" class="inline-flex items-center px-4 py-2 bg-orange-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-orange-500 active:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                                Bill Calculator
+                            </button>
+                            @endcan
                             @can('manage-tenants')
                             <a href="{{ route('admin.users') }}" class="inline-flex items-center px-3 py-2 bg-gray-200 dark:bg-gray-700 rounded text-xs text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600">Users</a>
                             <button x-data @click="$dispatch('open-create-tenant')" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500 active:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">Create Tenant</button>
@@ -31,7 +35,9 @@
                                 @click.away="open = false"
                                 class="absolute right-0 top-16 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md overflow-hidden shadow-xl z-50 ring-1 ring-black ring-opacity-5 py-1 origin-top-right"
                                 style="display: none;">
+                                @can('manage-tenants')
                                 <button @click="$dispatch('open-bill-calc-modal'); open = false" class="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Bill Calculator</button>
+                                @endcan
                                 @can('manage-tenants')
                                 <a href="{{ route('admin.users') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Users</a>
                                 <button @click="$dispatch('open-create-tenant'); open = false" class="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Create Tenant</button>
@@ -56,10 +62,12 @@
                 <livewire:dashboard.stats />
 
                 <p>{{ __("You're logged in!") }}</p>
+
+                <livewire:bill-calculator />
+
                 @can('manage-tenants')
                 <livewire:tenants-table />
                 <livewire:tenant-bill-history />
-                <livewire:bill-calculator />
                 @else
                 <p class="text-sm text-gray-600 dark:text-gray-400">You do not have permission to manage tenants.</p>
                 @endcan
