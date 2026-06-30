@@ -839,14 +839,23 @@
             </svg>
           </a>
         </div>
+
         <div class="border-t border-gray-700 mt-6 pt-6">
           <p class="text-gray-400 text-sm">
-            © 2025 GETA Water Bill Management System. All Rights Reserved.
+            © {{ date('Y') }} GETA Water Bill Management System. All Rights Reserved.
           </p>
           <p class="text-gray-400 text-sm mt-2">
-            Developed by <a href="https://github.com/MarkColeMukisa" target="_blank" class="text-primary hover:text-primary/80 transition-colors duration-300 underline">MarkColeMukisa</a> | 0702262806
+            Developed by 
+            <a 
+              href="https://www.markcole.dev" 
+              target="_blank" 
+              class="text-primary hover:text-primary/80 transition-colors duration-300 underline">
+              MarkColeMukisa
+          </a> 
+          | 0702262806
           </p>
         </div>
+
       </div>
     </div>
   </footer>

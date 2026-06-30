@@ -7,9 +7,9 @@ namespace App\Services;
 use App\Contracts\SmsServiceInterface;
 use App\Models\Bill;
 use App\Models\Tenant;
-use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class NotificationService
 {
@@ -51,7 +51,7 @@ class NotificationService
             ]);
 
             return true;
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             Log::error("SMS notification failed for tenant {$tenant->name}: ".$e->getMessage());
 
             $bill->update([
@@ -73,9 +73,9 @@ class NotificationService
         $formattedAmount = number_format($amount);
 
         return "Hello {$tenant->name}, 
-        Geta WaterBill Services informs you that your bill for 
+        Geta WaterBill Services informs you that your Water bill for 
         {$bill->month} {$bill->year} is due. Total amount: UGX {$formattedAmount}. 
-        For inquiries, WhatsApp Cole behind the scenes: https://wa.me/256702262806";
+        For inquiries, WhatsApp or dial Cole behind the scenes: https://wa.me/256702262806";
     }
 
     /**

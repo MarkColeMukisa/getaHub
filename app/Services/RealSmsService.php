@@ -8,6 +8,7 @@ use App\Contracts\SmsServiceInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use RuntimeException;
 
 class RealSmsService implements SmsServiceInterface
 {
@@ -16,11 +17,15 @@ class RealSmsService implements SmsServiceInterface
      */
     public function send(string $recipient, string $message): JsonResponse
     {
+        $key = config('services.marz.key');
+        $secret = config('services.marz.secret');
+        $url = config('services.marz.url');
 
-        $response = Http::withBasicAuth(
-            config('services.marz.key'),
-            config('services.marz.secret')
-        )->post(config('services.marz.url'), [
+        if (empty($key) || empty($secret)) {
+            throw new RuntimeException('MARZ SMS credentials (MARZ_API_KEY / MARZ_API_SECRET) are not configured in .env');
+        }
+
+        $response = Http::withBasicAuth($key, $secret)->post($url, [
             'recipient' => $recipient,
             'message' => $message,
         ]);
