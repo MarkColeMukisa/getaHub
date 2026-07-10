@@ -1,17 +1,17 @@
 {
     "agents": [
-        "codex",
-        "gemini",
-        "opencode"
+        "claude_code"
     ],
+    "cloud": true,
     "guidelines": true,
     "mcp": true,
-    "nightwatch_mcp": false,
+    "nightwatch": false,
     "sail": false,
     "skills": [
         "laravel-best-practices",
         "livewire-development",
         "pest-testing",
-        "tailwindcss-development"
+        "tailwindcss-development",
+        "deploying-laravel-cloud"
     ]
 }

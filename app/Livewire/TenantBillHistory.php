@@ -23,12 +23,6 @@ class TenantBillHistory extends Component
         'open-bill-history' => 'open',
     ];
 
-    public function openBillHistory(int $tenant): void {}
-
-    public function openBillHistoryTenant(int $tenant): void {}
-
-    public function openBillHistoryTenantId(int $tenant): void {}
-
     public function open(int $tenant): void
     {
         $tenantModel = Tenant::findOrFail($tenant);

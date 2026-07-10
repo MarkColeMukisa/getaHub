@@ -15,7 +15,7 @@ class TenantExportTest extends TestCase
 
     public function test_can_export_filtered_sorted_csv(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['is_admin' => true]);
         Tenant::factory()->create(['name' => 'Alpha', 'contact' => '111', 'room_number' => 'R1']);
         Tenant::factory()->create(['name' => 'Beta', 'contact' => '222', 'room_number' => 'R2']);
         Tenant::factory()->create(['name' => 'Gamma', 'contact' => '333', 'room_number' => 'R3']);

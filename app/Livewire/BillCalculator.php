@@ -35,18 +35,8 @@ class BillCalculator extends Component
 
     public function openModal(): void
     {
-        logger('openModal called');
         $this->resetForm();
         $this->showModal = true;
-        logger('showModal set to: '.$this->showModal);
-    }
-
-    public function openBillCalcModal(): void
-    {
-        logger('openBillCalcModal called');
-        $this->resetForm();
-        $this->showModal = true;
-        logger('showModal set to: '.$this->showModal);
     }
 
     public function updatedTenantId($value): void
@@ -137,7 +127,7 @@ class BillCalculator extends Component
     public function render()
     {
         return view('livewire.bill-calculator', [
-            'tenants' => Tenant::orderBy('name')->get(),
+            'tenants' => $this->showModal ? Tenant::orderBy('name')->get() : collect(),
         ]);
     }
 }

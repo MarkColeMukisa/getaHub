@@ -27,10 +27,12 @@ class TenantSearchTest extends TestCase
         $response->assertDontSee('Charlie');
     }
 
-    public function test_non_admin_cannot_access_dashboard(): void
+    public function test_non_admin_has_restricted_dashboard_access(): void
     {
         $user = User::factory()->create(['is_admin' => false]);
         $response = $this->actingAs($user)->get(route('dashboard'));
-        $response->assertForbidden();
+        $response->assertOk();
+        $response->assertDontSee('Create Tenant');
+        $response->assertSee('You do not have permission to manage tenants.');
     }
 }

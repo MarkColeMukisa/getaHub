@@ -18,15 +18,20 @@ class Stats extends Component
         $now = now();
         $startOfMonth = $now->copy()->startOfMonth();
 
+        $billCounts = Bill::query()
+            ->selectRaw(
+                'SUM(CASE WHEN created_at BETWEEN ? AND ? THEN 1 ELSE 0 END) as bills_this_month,'.
+                'SUM(CASE WHEN notified_at IS NOT NULL AND notified_at BETWEEN ? AND ? THEN 1 ELSE 0 END) as notifications_sent,'.
+                'SUM(CASE WHEN notification_error IS NOT NULL AND notified_at IS NULL THEN 1 ELSE 0 END) as failed_notifications',
+                [$startOfMonth, $now, $startOfMonth, $now]
+            )
+            ->first();
+
         $stats = [
             'total_tenants' => Tenant::count(),
-            'bills_this_month' => Bill::whereBetween('created_at', [$startOfMonth, $now])->count(),
-            'notifications_sent' => Bill::whereNotNull('notified_at')
-                ->whereBetween('notified_at', [$startOfMonth, $now])
-                ->count(),
-            'failed_notifications' => Bill::whereNotNull('notification_error')
-                ->whereNull('notified_at')
-                ->count(),
+            'bills_this_month' => (int) $billCounts->bills_this_month,
+            'notifications_sent' => (int) $billCounts->notifications_sent,
+            'failed_notifications' => (int) $billCounts->failed_notifications,
         ];
 
         return view('livewire.dashboard.stats', [

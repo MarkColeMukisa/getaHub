@@ -4,6 +4,10 @@ use App\Events\BillCreated;
 use App\Models\Bill;
 use App\Models\Tenant;
 use Illuminate\Broadcasting\Channel;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+uses(TestCase::class, RefreshDatabase::class);
 
 it('broadcasts on public.metrics with alias bill.created', function () {
     $tenant = Tenant::factory()->create();

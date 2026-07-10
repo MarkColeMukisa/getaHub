@@ -18,7 +18,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(function ($app): SmsServiceInterface {
+        $this->app->bind(SmsServiceInterface::class, function ($app): SmsServiceInterface {
             if (config('services.sms.mode') === 'real') {
                 return new RealSmsService;
             }

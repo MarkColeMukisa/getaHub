@@ -45,14 +45,11 @@
             @forelse($tenants as $t)
             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
 
-                <td class="px-3 py-2">{!! $search ? preg_replace('/('.preg_quote($search,'/').')/i','<mark class="bg-yellow-200 dark:bg-yellow-600/60 px-0.5 rounded">$1</mark>', e($t->name)) : e($t->name) !!}
-                </td>
+                <td class="px-3 py-2"><x-highlight :text="$t->name" :search="$search" /></td>
 
-                <td class="px-3 py-2 hidden md:table-cell">{!! $search ? preg_replace('/('.preg_quote($search,'/').')/i','<mark class="bg-yellow-200 dark:bg-yellow-600/60 px-0.5 rounded">$1</mark>', e($t->contact)) : e($t->contact) !!}
-                </td>
+                <td class="px-3 py-2 hidden md:table-cell"><x-highlight :text="$t->contact" :search="$search" /></td>
 
-                <td class="px-3 py-2">{!! $search ? preg_replace('/('.preg_quote($search,'/').')/i','<mark class="bg-yellow-200 dark:bg-yellow-600/60 px-0.5 rounded">$1</mark>', e($t->room_number)) : e($t->room_number) !!}
-                </td>
+                <td class="px-3 py-2"><x-highlight :text="$t->room_number" :search="$search" /></td>
 
                 <td class="px-3 py-2 text-xs hidden md:table-cell">
                     {{ $t->created_at ? $t->created_at->diffForHumans() : 'N/A' }}

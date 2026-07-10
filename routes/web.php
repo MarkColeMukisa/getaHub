@@ -1,10 +1,10 @@
 <?php
 
+use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\BillController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SmsController;
 use App\Http\Controllers\TenantController;
-use App\Models\Bill;
 use App\Models\Tenant;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -15,37 +15,17 @@ Route::get('test', function (): never {
 });
 
 Route::get('/', function (): Factory|View {
+    return view('welcome');
+})->name('welcome');
+
+Route::get('/calculator', function (): Factory|View {
     $tenants = Tenant::orderBy('name')->get();
-    $bills = Bill::with('tenant')->latest('id')->limit(50)->get();
 
-    // Server-side calculations for presentation
-    $vatRate = config('billing.vat_rate');
-    $payeFixed = config('billing.paye_amount');
-    $rubbishFee = config('billing.rubbish_fee');
-    $billRows = $bills->map(function ($bill) use ($vatRate, $payeFixed, $rubbishFee): array {
-        $base = $bill->total_amount; // persisted base (units * unit price)
-        $vat = (int) round($base * $vatRate);
-        $paye = $payeFixed;
-        $rubbish = $rubbishFee;
-        $grand = $base + $vat + $paye + $rubbish;
+    return view('calculator', ['tenants' => $tenants]);
+})->name('calculator');
 
-        return [
-            'tenant_display' => $bill->tenant->name.' (Room '.$bill->tenant->room_number.')',
-            'previous_reading' => $bill->previous_reading,
-            'current_reading' => $bill->current_reading,
-            'units_used' => $bill->units_used,
-            'base_amount' => $base,
-            'rubbish' => $rubbish,
-            'grand_total' => $grand,
-        ];
-    });
-    $grandTotal = $billRows->sum('grand_total');
-
-    return view('index', ['tenants' => $tenants, 'billRows' => $billRows, 'grandTotal' => $grandTotal]);
-});
-
-// Redirect /index to root for consistency
-Route::redirect('/index', '/');
+// Redirect /index to the calculator tool for consistency with prior behavior
+Route::redirect('/index', '/calculator');
 
 Route::get('/dashboard', [TenantController::class, 'index'])
     ->middleware(['auth', 'verified'])
@@ -59,6 +39,7 @@ Route::middleware('auth')->group(function () {
     // Bills
     Route::post('/bills', [BillController::class, 'store'])->name('bills.store');
     Route::get('/tenants/{tenant}/previous-reading', [BillController::class, 'previousReading'])->name('tenants.previous-reading');
+    Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
 });
 
 // Admin-only tenant management routes
